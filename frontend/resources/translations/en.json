@@ -212,7 +212,8 @@
     "addToPageButton": "Add to page",
     "addToPageTitle": "Add message to...",
     "addToNewPage": "Add to a new page",
-    "addToNewPageName": "Messages extracted from \"{}\""
+    "addToNewPageName": "Messages extracted from \"{}\"",
+    "onlyUseRags": "Selected sources only"
   },
   "trash": {
     "text": "Trash",

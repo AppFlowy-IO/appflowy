@@ -19,6 +19,7 @@ use crate::notification::{chat_notification_builder, ChatNotification};
 use flowy_storage_pub::storage::StorageService;
 use lib_infra::async_trait::async_trait;
 use lib_infra::util::timestamp;
+use serde_json::json;
 use std::path::PathBuf;
 use std::sync::{Arc, Weak};
 use tracing::{error, info, trace};
@@ -346,12 +347,12 @@ impl AIManager {
     Ok(())
   }
 
-  pub async fn get_rag_ids(&self, chat_id: &str) -> FlowyResult<Vec<String>> {
+  pub async fn get_chat_settings(&self, chat_id: &str) -> FlowyResult<ChatSettingsPB> {
     if let Some(settings) = self
       .store_preferences
       .get_object::<ChatSettings>(&setting_store_key(chat_id))
     {
-      return Ok(settings.rag_ids);
+      return Ok(settings.into());
     }
 
     let settings = refresh_chat_setting(
@@ -361,49 +362,58 @@ impl AIManager {
       chat_id,
     )
     .await?;
-    Ok(settings.rag_ids)
+    Ok(settings.into())
   }
 
-  pub async fn update_rag_ids(&self, chat_id: &str, rag_ids: Vec<String>) -> FlowyResult<()> {
+  pub async fn update_settings(
+    &self,
+    chat_id: &str,
+    rag_ids: Option<Vec<String>>,
+    rag_only: Option<bool>,
+  ) -> FlowyResult<()> {
     info!("[Chat] update chat:{} rag ids: {:?}", chat_id, rag_ids);
-
     let workspace_id = self.user_service.workspace_id()?;
     let update_setting = UpdateChatParams {
       name: None,
-      metadata: None,
-      rag_ids: Some(rag_ids.clone()),
+      metadata: rag_only.map(|rag_only| json!({"rag_only": rag_only})),
+      rag_ids: rag_ids.clone(),
     };
+
     self
       .cloud_service_wm
       .update_chat_settings(&workspace_id, chat_id, update_setting)
       .await?;
 
     let chat_setting_store_key = setting_store_key(chat_id);
-
-    if let Some(settings) = self
+    if let Some(mut settings) = self
       .store_preferences
       .get_object::<ChatSettings>(&chat_setting_store_key)
     {
-      if let Err(err) = self.store_preferences.set_object(
-        &chat_setting_store_key,
-        &ChatSettings {
-          rag_ids: rag_ids.clone(),
-          ..settings
-        },
-      ) {
+      if let Some(rag_only) = rag_only {
+        settings.metadata = json!({"rag_only": rag_only});
+      }
+
+      if let Some(rag_ids) = rag_ids {
+        settings.rag_ids = rag_ids.clone();
+        let user_service = self.user_service.clone();
+        let external_service = self.external_service.clone();
+        tokio::spawn(async move {
+          if let Ok(workspace_id) = user_service.workspace_id() {
+            let _ = external_service
+              .sync_rag_documents(&workspace_id, rag_ids)
+              .await;
+          }
+        });
+      }
+
+      if let Err(err) = self
+        .store_preferences
+        .set_object(&chat_setting_store_key, &settings)
+      {
         error!("failed to set chat settings: {}", err);
       }
     }
 
-    let user_service = self.user_service.clone();
-    let external_service = self.external_service.clone();
-    tokio::spawn(async move {
-      if let Ok(workspace_id) = user_service.workspace_id() {
-        let _ = external_service
-          .sync_rag_documents(&workspace_id, rag_ids)
-          .await;
-      }
-    });
     Ok(())
   }
 }
@@ -440,9 +450,7 @@ async fn refresh_chat_setting(
   }
 
   chat_notification_builder(chat_id, ChatNotification::DidUpdateChatSettings)
-    .payload(ChatSettingsPB {
-      rag_ids: settings.rag_ids.clone(),
-    })
+    .payload(ChatSettingsPB::from(settings.clone()))
     .send();
 
   Ok(settings)

@@ -9,6 +9,7 @@ import 'package:appflowy_result/appflowy_result.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flowy_infra_ui/flowy_infra_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_core/flutter_chat_core.dart';
@@ -296,12 +297,21 @@ class _ChatContentPage extends StatelessWidget {
                       ),
                     );
                   },
-                  onUpdateSelectedSources: (ids) {
-                    chatBloc.add(
-                      ChatEvent.updateSelectedSources(
-                        selectedSourcesIds: ids,
-                      ),
-                    );
+                  onUpdateSelectedSources: (ragOnly, ids) {
+                    if (ragOnly != chatBloc.state.onlyUseSelectedSources) {
+                      chatBloc.add(
+                        ChatEvent.setRagOnly(
+                          ragOnly: ragOnly,
+                        ),
+                      );
+                    }
+                    if (!listEquals(ids, chatBloc.state.selectedSourceIds)) {
+                      chatBloc.add(
+                        ChatEvent.updateSelectedSources(
+                          selectedSourcesIds: ids,
+                        ),
+                      );
+                    }
                   },
                 )
               : MobileAIPromptInput(

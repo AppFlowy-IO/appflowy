@@ -27,7 +27,7 @@ class PromptInputDesktopSelectSourcesButton extends StatefulWidget {
     required this.onUpdateSelectedSources,
   });
 
-  final void Function(List<String>) onUpdateSelectedSources;
+  final void Function(bool, List<String>) onUpdateSelectedSources;
 
   @override
   State<PromptInputDesktopSelectSourcesButton> createState() =>
@@ -43,9 +43,10 @@ class _PromptInputDesktopSelectSourcesButtonState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      cubit.updateSelectedSources(
-        context.read<ChatBloc>().state.selectedSourceIds,
-      );
+      final chatBlocState = context.read<ChatBloc>().state;
+      cubit
+        ..updateSelectedSources(chatBlocState.selectedSourceIds)
+        ..updateOnlyUseSelectedSources(chatBlocState.onlyUseSelectedSources);
     });
   }
 
@@ -80,6 +81,7 @@ class _PromptInputDesktopSelectSourcesButtonState
           return BlocListener<ChatBloc, ChatState>(
             listener: (context, state) {
               cubit
+                ..updateOnlyUseSelectedSources(state.onlyUseSelectedSources)
                 ..updateSelectedSources(state.selectedSourceIds)
                 ..updateSelectedStatus();
             },
@@ -95,7 +97,10 @@ class _PromptInputDesktopSelectSourcesButtonState
                 }
               },
               onClose: () {
-                widget.onUpdateSelectedSources(cubit.selectedSourceIds);
+                widget.onUpdateSelectedSources(
+                  cubit.state.onlyUseSelectedSources,
+                  cubit.selectedSourceIds,
+                );
                 if (spaceView != null) {
                   context.read<ChatSettingsCubit>().refreshSources(spaceView);
                 }
@@ -186,6 +191,29 @@ class _PopoverContent extends StatelessWidget {
                 width: 600,
                 onSearch: (context, value) =>
                     context.read<ChatSettingsCubit>().updateFilter(value),
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+              height: 30,
+              child: FlowyButton(
+                text: FlowyText(
+                  LocaleKeys.chat_onlyUseRags.tr(),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                onTap: () {
+                  context
+                      .read<ChatSettingsCubit>()
+                      .updateOnlyUseSelectedSources(
+                        !state.onlyUseSelectedSources,
+                      );
+                },
+                rightIcon: state.onlyUseSelectedSources
+                    ? FlowySvg(
+                        FlowySvgs.check_s,
+                        color: Theme.of(context).colorScheme.primary,
+                      )
+                    : null,
               ),
             ),
             _buildDivider(),

@@ -32,7 +32,7 @@ class DesktopAIPromptInput extends StatefulWidget {
   final bool isStreaming;
   final void Function() onStopStreaming;
   final void Function(String, Map<String, dynamic>) onSubmitted;
-  final void Function(List<String>) onUpdateSelectedSources;
+  final void Function(bool, List<String>) onUpdateSelectedSources;
 
   @override
   State<DesktopAIPromptInput> createState() => _DesktopAIPromptInputState();
@@ -497,7 +497,7 @@ class _PromptBottomActions extends StatelessWidget {
   final SendButtonState sendButtonState;
   final void Function() onSendPressed;
   final void Function() onStopStreaming;
-  final void Function(List<String>) onUpdateSelectedSources;
+  final void Function(bool, List<String>) onUpdateSelectedSources;
 
   @override
   Widget build(BuildContext context) {

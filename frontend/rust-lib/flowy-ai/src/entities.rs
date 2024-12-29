@@ -4,7 +4,8 @@ use std::collections::HashMap;
 
 use crate::local_ai::local_llm_resource::PendingResource;
 use flowy_ai_pub::cloud::{
-  ChatMessage, LLMModel, RelatedQuestion, RepeatedChatMessage, RepeatedRelatedQuestion,
+  ChatMessage, ChatSettings, LLMModel, RelatedQuestion, RepeatedChatMessage,
+  RepeatedRelatedQuestion,
 };
 use flowy_derive::{ProtoBuf, ProtoBuf_Enum};
 use lib_infra::validator_fn::required_not_empty_str;
@@ -542,7 +543,27 @@ pub struct CreateChatContextPB {
 #[derive(Default, ProtoBuf, Clone, Debug)]
 pub struct ChatSettingsPB {
   #[pb(index = 1)]
-  pub rag_ids: Vec<String>,
+  pub rag_ids: RepeatedRagId,
+
+  #[pb(index = 2)]
+  pub rag_only: bool,
+}
+
+impl From<ChatSettings> for ChatSettingsPB {
+  fn from(value: ChatSettings) -> Self {
+    let rag_ids = RepeatedRagId {
+      rag_ids: value.rag_ids.clone(),
+    };
+
+    let rag_only = value
+      .metadata
+      .as_object()
+      .and_then(|map| map.get("rag_only"))
+      .and_then(|value| value.as_bool())
+      .unwrap_or_default();
+
+    Self { rag_ids, rag_only }
+  }
 }
 
 #[derive(Default, ProtoBuf, Clone, Debug, Validate)]
@@ -551,6 +572,15 @@ pub struct UpdateChatSettingsPB {
   #[validate(nested)]
   pub chat_id: ChatId,
 
-  #[pb(index = 2)]
+  #[pb(index = 2, one_of)]
+  pub rag_ids: Option<RepeatedRagId>,
+
+  #[pb(index = 3, one_of)]
+  pub rag_only: Option<bool>,
+}
+
+#[derive(Default, ProtoBuf, Clone, Debug)]
+pub struct RepeatedRagId {
+  #[pb(index = 1)]
   pub rag_ids: Vec<String>,
 }

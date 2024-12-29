@@ -244,16 +244,29 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           },
           didReceiveChatSettings: (settings) {
             emit(
-              state.copyWith(selectedSourceIds: settings.ragIds),
+              state.copyWith(
+                selectedSourceIds: settings.ragIds.ragIds,
+                onlyUseSelectedSources: settings.ragOnly,
+              ),
             );
           },
           updateSelectedSources: (selectedSourcesIds) async {
             emit(state.copyWith(selectedSourceIds: selectedSourcesIds));
+            final ragIds = RepeatedRagId(ragIds: selectedSourcesIds);
+            final payload = UpdateChatSettingsPB.create()
+              ..chatId = ChatId(value: chatId)
+              ..ragIds = ragIds;
 
-            final payload = UpdateChatSettingsPB(
-              chatId: ChatId(value: chatId),
-              ragIds: selectedSourcesIds,
-            );
+            await AIEventUpdateChatSettings(payload)
+                .send()
+                .onFailure(Log.error);
+          },
+          setRagOnly: (ragOnly) async {
+            emit(state.copyWith(onlyUseSelectedSources: ragOnly));
+            final payload = UpdateChatSettingsPB.create()
+              ..chatId = ChatId(value: chatId)
+              ..ragOnly = ragOnly;
+
             await AIEventUpdateChatSettings(payload)
                 .send()
                 .onFailure(Log.error);
@@ -575,6 +588,10 @@ class ChatEvent with _$ChatEvent {
     required List<String> selectedSourcesIds,
   }) = _UpdateSelectedSources;
 
+  const factory ChatEvent.setRagOnly({
+    required bool ragOnly,
+  }) = _SetRagOnly;
+
   // send message
   const factory ChatEvent.sendMessage({
     required String message,
@@ -611,12 +628,14 @@ class ChatEvent with _$ChatEvent {
 @freezed
 class ChatState with _$ChatState {
   const factory ChatState({
+    required bool onlyUseSelectedSources,
     required List<String> selectedSourceIds,
     required LoadChatMessageStatus loadingState,
     required PromptResponseState promptResponseState,
   }) = _ChatState;
 
   factory ChatState.initial() => const ChatState(
+        onlyUseSelectedSources: false,
         selectedSourceIds: [],
         loadingState: LoadChatMessageStatus.loading,
         promptResponseState: PromptResponseState.ready,

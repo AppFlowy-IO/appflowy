@@ -107,6 +107,12 @@ class ChatSettingsCubit extends Cubit<ChatSettingsState> {
   List<ChatSource> selectedSources = [];
   String filter = '';
 
+  void updateOnlyUseSelectedSources(bool onlyUseSelectedSources) {
+    if (state.onlyUseSelectedSources != onlyUseSelectedSources) {
+      emit(state.copyWith(onlyUseSelectedSources: onlyUseSelectedSources));
+    }
+  }
+
   void updateSelectedSources(List<String> newSelectedSourceIds) {
     selectedSourceIds = [...newSelectedSourceIds];
   }
@@ -380,11 +386,13 @@ class ChatSettingsCubit extends Cubit<ChatSettingsState> {
 @freezed
 class ChatSettingsState with _$ChatSettingsState {
   const factory ChatSettingsState({
+    required bool onlyUseSelectedSources,
     required List<ChatSource> visibleSources,
     required List<ChatSource> selectedSources,
   }) = _ChatSettingsState;
 
   factory ChatSettingsState.initial() => const ChatSettingsState(
+        onlyUseSelectedSources: false,
         visibleSources: [],
         selectedSources: [],
       );
