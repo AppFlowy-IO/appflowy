@@ -693,41 +693,7 @@ impl DatabaseViewEditor {
     Ok(())
   }
 
-  pub async fn v_update_calculate(&self, field_id: &str) -> Option<()> {
-    let field = self.delegate.get_field(field_id).await?;
-    let cal = self
-      .delegate
-      .get_calculation(&self.view_id, &field.id)
-      .await?;
-
-    let cells = self
-      .delegate
-      .get_cells_for_field(&self.view_id, field_id)
-      .await
-      .into_iter()
-      .flat_map(|row_cell| row_cell.cell.map(Arc::new))
-      .collect::<Vec<_>>();
-
-    let changes = self
-      .calculations_controller
-      .handle_cells_changed(&field, &cal, cells)
-      .await;
-
-    if !changes.is_empty() {
-      let notification = CalculationChangesetNotificationPB::from_update(&self.view_id, changes);
-      if let Err(_err) = self
-        .notifier
-        .send(DatabaseViewChanged::CalculationValueNotification(
-          notification,
-        ))
-      {
-        error!("Failed to send CalculationValueNotification");
-      }
-    }
-
-    None
-  }
-
+  #[instrument(level = "trace", skip_all)]
   pub async fn v_calculate_rows(&self, fields: Vec<Field>, rows: Vec<Arc<Row>>) -> FlowyResult<()> {
     let mut updates = vec![];
     // Filter fields to only those with calculations
@@ -768,6 +734,7 @@ impl DatabaseViewEditor {
     }
 
     // Send notification if updates were made
+    trace!("Calculations updates: {:?}", updates);
     if !updates.is_empty() {
       let notification = CalculationChangesetNotificationPB::from_update(&self.view_id, updates);
       if let Err(_err) = self
@@ -798,10 +765,42 @@ impl DatabaseViewEditor {
     self.delegate.get_all_calculations(&self.view_id).await
   }
 
-  pub async fn v_update_calculations(
-    &self,
-    params: UpdateCalculationChangesetPB,
-  ) -> FlowyResult<()> {
+  pub async fn v_update_calculate(&self, field_id: &str) -> Option<()> {
+    let field = self.delegate.get_field(field_id).await?;
+    let cal = self
+      .delegate
+      .get_calculation(&self.view_id, &field.id)
+      .await?;
+
+    let cells = self
+      .delegate
+      .get_cells_for_field(&self.view_id, field_id)
+      .await
+      .into_iter()
+      .flat_map(|row_cell| row_cell.cell.map(Arc::new))
+      .collect::<Vec<_>>();
+
+    let changes = self
+      .calculations_controller
+      .handle_cells_changed(&field, &cal, cells)
+      .await;
+
+    if !changes.is_empty() {
+      let notification = CalculationChangesetNotificationPB::from_update(&self.view_id, changes);
+      if let Err(_err) = self
+        .notifier
+        .send(DatabaseViewChanged::CalculationValueNotification(
+          notification,
+        ))
+      {
+        error!("Failed to send CalculationValueNotification");
+      }
+    }
+
+    None
+  }
+
+  pub async fn v_edit_calculations(&self, params: UpdateCalculationChangesetPB) -> FlowyResult<()> {
     let calculation_id = params
       .calculation_id
       .unwrap_or_else(gen_database_calculation_id);

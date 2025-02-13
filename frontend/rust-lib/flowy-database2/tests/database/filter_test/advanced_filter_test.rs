@@ -1,4 +1,4 @@
-use crate::database::filter_test::script::{DatabaseFilterTest, FilterRowChanged};
+use crate::database::database_editor::{DatabaseEditorTest, FilterRowChanged};
 use bytes::Bytes;
 use flowy_database2::entities::{
   CheckboxFilterConditionPB, CheckboxFilterPB, DateFilterConditionPB, DateFilterPB, FieldType,
@@ -16,7 +16,7 @@ use std::convert::TryInto;
 ///
 #[tokio::test]
 async fn create_advanced_filter_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
 
   let create_checkbox_filter = || -> CheckboxFilterPB {
     CheckboxFilterPB {
@@ -189,7 +189,7 @@ async fn create_advanced_filter_test() {
 ///
 #[tokio::test]
 async fn create_advanced_filter_with_conversion_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
 
   let create_checkbox_filter = || -> CheckboxFilterPB {
     CheckboxFilterPB {

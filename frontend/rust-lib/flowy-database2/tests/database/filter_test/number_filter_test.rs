@@ -1,10 +1,10 @@
-use crate::database::filter_test::script::{DatabaseFilterTest, FilterRowChanged};
+use crate::database::database_editor::{DatabaseEditorTest, FilterRowChanged};
 use flowy_database2::entities::{FieldType, NumberFilterConditionPB, NumberFilterPB};
 use lib_infra::box_any::BoxAny;
 
 #[tokio::test]
 async fn grid_filter_number_is_equal_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
   let row_count = test.rows.len();
   let expected = 1;
 
@@ -30,7 +30,7 @@ async fn grid_filter_number_is_equal_test() {
 
 #[tokio::test]
 async fn grid_filter_number_is_less_than_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
   let row_count = test.rows.len();
   let expected = 2;
 
@@ -57,7 +57,7 @@ async fn grid_filter_number_is_less_than_test() {
 #[tokio::test]
 #[should_panic]
 async fn grid_filter_number_is_less_than_test2() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
   let row_count = test.rows.len();
   let expected = 2;
 
@@ -83,7 +83,7 @@ async fn grid_filter_number_is_less_than_test2() {
 
 #[tokio::test]
 async fn grid_filter_number_is_less_than_or_equal_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
   let row_count = test.rows.len();
   let expected = 3;
 
@@ -109,7 +109,7 @@ async fn grid_filter_number_is_less_than_or_equal_test() {
 
 #[tokio::test]
 async fn grid_filter_number_is_empty_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
   let row_count = test.rows.len();
   let expected = 2;
 
@@ -135,7 +135,7 @@ async fn grid_filter_number_is_empty_test() {
 
 #[tokio::test]
 async fn grid_filter_number_is_not_empty_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
   let row_count = test.rows.len();
   let expected = 5;
 

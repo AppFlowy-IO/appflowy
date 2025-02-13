@@ -1,10 +1,10 @@
-use crate::database::filter_test::script::{DatabaseFilterTest, FilterRowChanged};
+use crate::database::database_editor::{DatabaseEditorTest, FilterRowChanged};
 use flowy_database2::entities::{DateFilterConditionPB, DateFilterPB, FieldType};
 use lib_infra::box_any::BoxAny;
 
 #[tokio::test]
 async fn grid_filter_date_is_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
   let row_count = test.rows.len();
   let expected = 3;
 
@@ -32,7 +32,7 @@ async fn grid_filter_date_is_test() {
 
 #[tokio::test]
 async fn grid_filter_date_after_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
   let row_count = test.rows.len();
   let expected = 3;
 
@@ -60,7 +60,7 @@ async fn grid_filter_date_after_test() {
 
 #[tokio::test]
 async fn grid_filter_date_on_or_after_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
   let row_count = test.rows.len();
   let expected = 3;
 
@@ -88,7 +88,7 @@ async fn grid_filter_date_on_or_after_test() {
 
 #[tokio::test]
 async fn grid_filter_date_on_or_before_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
   let row_count = test.rows.len();
   let expected = 4;
 
@@ -116,7 +116,7 @@ async fn grid_filter_date_on_or_before_test() {
 
 #[tokio::test]
 async fn grid_filter_date_within_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
   let row_count = test.rows.len();
   let expected = 5;
 

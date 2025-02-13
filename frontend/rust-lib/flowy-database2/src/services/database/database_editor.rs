@@ -329,7 +329,7 @@ impl DatabaseEditor {
       .database_views
       .get_or_init_view_editor(&update.view_id)
       .await?;
-    view_editor.v_update_calculations(update).await?;
+    view_editor.v_edit_calculations(update).await?;
     Ok(())
   }
 

@@ -1,10 +1,10 @@
-use crate::database::filter_test::script::{DatabaseFilterTest, FilterRowChanged};
+use crate::database::database_editor::{DatabaseEditorTest, FilterRowChanged};
 use flowy_database2::entities::{FieldType, SelectOptionFilterConditionPB, SelectOptionFilterPB};
 use lib_infra::box_any::BoxAny;
 
 #[tokio::test]
 async fn grid_filter_multi_select_is_empty_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
 
   // Create Multi-Select "Is Empty" filter
   test
@@ -25,7 +25,7 @@ async fn grid_filter_multi_select_is_empty_test() {
 
 #[tokio::test]
 async fn grid_filter_multi_select_is_not_empty_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
 
   // Create Multi-Select "Is Not Empty" filter
   test
@@ -46,7 +46,7 @@ async fn grid_filter_multi_select_is_not_empty_test() {
 
 #[tokio::test]
 async fn grid_filter_single_select_is_empty_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
   let expected = 3;
   let row_count = test.rows.len();
 
@@ -72,7 +72,7 @@ async fn grid_filter_single_select_is_empty_test() {
 
 #[tokio::test]
 async fn grid_filter_single_select_is_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
   let field = test.get_first_field(FieldType::SingleSelect).await;
   let mut options = test.get_single_select_type_option(&field.id).await;
   let expected = 2;
@@ -100,7 +100,7 @@ async fn grid_filter_single_select_is_test() {
 
 #[tokio::test]
 async fn grid_filter_single_select_is_test2() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
   let field = test.get_first_field(FieldType::SingleSelect).await;
   let row_details = test.get_rows().await;
   let mut options = test.get_single_select_type_option(&field.id).await;
@@ -147,7 +147,7 @@ async fn grid_filter_single_select_is_test2() {
 
 #[tokio::test]
 async fn grid_filter_multi_select_contains_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
   let field = test.get_first_field(FieldType::MultiSelect).await;
   let mut options = test.get_multi_select_type_option(&field.id).await;
 
@@ -170,7 +170,7 @@ async fn grid_filter_multi_select_contains_test() {
 
 #[tokio::test]
 async fn grid_filter_multi_select_contains_test2() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
   let field = test.get_first_field(FieldType::MultiSelect).await;
   let mut options = test.get_multi_select_type_option(&field.id).await;
 

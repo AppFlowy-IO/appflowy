@@ -1,10 +1,10 @@
-use crate::database::filter_test::script::{DatabaseFilterTest, FilterRowChanged};
+use crate::database::database_editor::{DatabaseEditorTest, FilterRowChanged};
 use flowy_database2::entities::{FieldType, TextFilterConditionPB, TextFilterPB};
 use lib_infra::box_any::BoxAny;
 
 #[tokio::test]
 async fn grid_filter_text_is_empty_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
 
   // Create Text "Is Empty" filter
   test
@@ -28,7 +28,7 @@ async fn grid_filter_text_is_empty_test() {
 
 #[tokio::test]
 async fn grid_filter_text_is_not_empty_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
 
   // Create Text "Is Not Empty" filter
   test
@@ -67,7 +67,7 @@ async fn grid_filter_text_is_not_empty_test() {
 
 #[tokio::test]
 async fn grid_filter_is_text_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
 
   // Create Text "Is" filter
   test
@@ -88,7 +88,7 @@ async fn grid_filter_is_text_test() {
 
 #[tokio::test]
 async fn grid_filter_contain_text_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
 
   // Create Text "Contains" filter
   test
@@ -109,7 +109,7 @@ async fn grid_filter_contain_text_test() {
 
 #[tokio::test]
 async fn grid_filter_contain_text_test2() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
   let row_detail = test.rows.clone();
 
   // Create Text "Contains" filter
@@ -143,7 +143,7 @@ async fn grid_filter_contain_text_test2() {
 
 #[tokio::test]
 async fn grid_filter_does_not_contain_text_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
 
   // Create Text "Does Not Contain" filter
   test
@@ -164,7 +164,7 @@ async fn grid_filter_does_not_contain_text_test() {
 
 #[tokio::test]
 async fn grid_filter_start_with_text_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
 
   // Create Text "Starts With" filter
   test
@@ -185,7 +185,7 @@ async fn grid_filter_start_with_text_test() {
 
 #[tokio::test]
 async fn grid_filter_ends_with_text_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
 
   // Create Text "Ends With" filter
   test
@@ -206,7 +206,7 @@ async fn grid_filter_ends_with_text_test() {
 
 #[tokio::test]
 async fn grid_update_text_filter_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
 
   // Create Text "Ends With" filter
   test
@@ -248,7 +248,7 @@ async fn grid_update_text_filter_test() {
 
 #[tokio::test]
 async fn grid_filter_delete_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
 
   // Create Text "Is Empty" filter
   test
@@ -278,7 +278,7 @@ async fn grid_filter_delete_test() {
 
 #[tokio::test]
 async fn grid_filter_update_empty_text_cell_test() {
-  let mut test = DatabaseFilterTest::new().await;
+  let mut test = DatabaseEditorTest::new_grid().await;
   let row = test.rows.clone();
 
   // Create Text "Is Empty" filter

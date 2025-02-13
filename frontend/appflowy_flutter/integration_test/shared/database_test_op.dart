@@ -769,12 +769,26 @@ extension AppFlowyDatabaseTest on WidgetTester {
     await tap(find.byType(CalculateCell).at(index));
     await pumpAndSettle();
 
-    await tap(
-      find.descendant(
-        of: find.byType(CalculationTypeItem),
-        matching: find.text(type.label),
-      ),
+    final calculateMenu = find
+        .descendant(
+          of: find.byType(CalculateSelector),
+          matching: find.byWidgetPredicate((w) => w is Scrollable),
+        )
+        .first;
+
+    final calculateType = find.descendant(
+      of: find.byType(CalculationTypeItem),
+      matching: find.text(type.label),
     );
+
+    await scrollUntilVisible(
+      calculateType,
+      20,
+      scrollable: calculateMenu,
+      duration: const Duration(milliseconds: 250),
+    );
+
+    await tap(calculateType);
     await pumpAndSettle();
   }
 

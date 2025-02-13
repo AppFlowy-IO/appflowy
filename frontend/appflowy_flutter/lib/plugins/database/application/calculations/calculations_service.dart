@@ -9,11 +9,9 @@ class CalculationsBackendService {
   final String viewId;
 
   // Get Calculations (initial fetch)
-
   Future<FlowyResult<RepeatedCalculationsPB, FlowyError>>
       getCalculations() async {
     final payload = DatabaseViewIdPB()..value = viewId;
-
     return DatabaseEventGetAllCalculations(payload).send();
   }
 

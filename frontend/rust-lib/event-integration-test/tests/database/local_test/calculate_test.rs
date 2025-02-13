@@ -9,7 +9,7 @@ use flowy_database2::entities::{
 use tokio::time::sleep;
 
 #[tokio::test]
-async fn calculation_integration_test1() {
+async fn get_calculate_after_edit_cell_test() {
   let test = EventIntegrationTest::new().await;
   test.sign_up_as_anon().await;
 
@@ -17,17 +17,8 @@ async fn calculation_integration_test1() {
   let payload = gen_csv_import_data("project.csv", &workspace_id);
   let view = test.import_data(payload).await.pop().unwrap();
   let database = test.open_database(&view.id).await;
+  let database_view_id = &view.id;
 
-  average_calculation(test, database, &view.id).await;
-}
-
-// Tests for the CalculationType::Average
-// Is done on the Delay column in the project.csv
-async fn average_calculation(
-  test: EventIntegrationTest,
-  database: DatabasePB,
-  database_view_id: &str,
-) {
   // Delay column is the 11th column (index 10) in the project.csv
   let delay_field = database.fields.get(10).unwrap();
 
@@ -54,6 +45,7 @@ async fn average_calculation(
   );
 
   // Update a cell in the delay column at fourth row (3rd index)
+  // edit the Delay column in the project.csv
   let cell_changeset = CellChangesetPB {
     view_id: database_view_id.to_string(),
     row_id: database.rows.get(3).unwrap().id.clone(),
