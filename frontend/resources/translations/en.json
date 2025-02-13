@@ -2008,8 +2008,8 @@
       "searchForAnImage": "Search for an image",
       "pleaseInputYourOpenAIKey": "please input your AI key in Settings page",
       "saveImageToGallery": "Save image",
-      "failedToAddImageToGallery": "Failed to add image to gallery",
-      "successToAddImageToGallery": "Image added to gallery successfully",
+      "failedToAddImageToGallery": "Failed to save image",
+      "successToAddImageToGallery": "Saved image to Photos",
       "unableToLoadImage": "Unable to load image",
       "maximumImageSize": "Maximum supported upload image size is 10MB",
       "uploadImageErrorImageSizeTooBig": "Image size must be less than 10MB",
@@ -3097,13 +3097,13 @@
   "autoUpdate": {
     "criticalUpdateTitle": "Update required to continue",
     "criticalUpdateDescription": "We've made improvements to enhance your experience! Please update from {currentVersion} to {newVersion} to keep using the app.",
-    "criticalUpdateButton": "Update now",
+    "criticalUpdateButton": "Update",
     "bannerUpdateTitle": "New Version Available!",
-    "bannerUpdateDescription": "Get the latest features and bug fixes. Click \"Update\" to install now",
+    "bannerUpdateDescription": "Get the latest features and fixes. Click \"Update\" to install now",
     "bannerUpdateButton": "Update",
     "settingsUpdateTitle": "New Version ({newVersion}) Available!",
     "settingsUpdateDescription": "Current version: {currentVersion} (Official build) → {newVersion}",
-    "settingsUpdateButton": "Update now",
+    "settingsUpdateButton": "Update",
     "settingsUpdateWhatsNew": "What's new"
   },
   "lockPage": {

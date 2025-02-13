@@ -32,11 +32,13 @@ class EditorStyleCustomizer {
     required this.context,
     required this.padding,
     this.width,
+    this.editorState,
   });
 
   final BuildContext context;
   final EdgeInsets padding;
   final double? width;
+  final EditorState? editorState;
 
   static const double maxDocumentWidth = 480 * 4;
   static const double minDocumentWidth = 480;
@@ -76,11 +78,15 @@ class EditorStyleCustomizer {
       fontFamily = appearanceFont;
     }
 
+    final cursorColor = (editorState?.editable ?? true)
+        ? (appearance.cursorColor ??
+            DefaultAppearanceSettings.getDefaultCursorColor(context))
+        : Colors.transparent;
+
     return EditorStyle.desktop(
       padding: padding,
       maxWidth: width,
-      cursorColor: appearance.cursorColor ??
-          DefaultAppearanceSettings.getDefaultCursorColor(context),
+      cursorColor: cursorColor,
       selectionColor: appearance.selectionColor ??
           DefaultAppearanceSettings.getDefaultSelectionColor(context),
       defaultTextDirection: appearance.defaultTextDirection,

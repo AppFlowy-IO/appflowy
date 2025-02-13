@@ -23,6 +23,8 @@ class VersionChecker {
 
     if (UniversalPlatform.isWindows || UniversalPlatform.isMacOS) {
       autoUpdater.setFeedURL(url);
+      // disable the auto update check
+      autoUpdater.setScheduledCheckInterval(0);
     }
   }
 

@@ -95,6 +95,12 @@ class _DatabaseBlockComponentWidgetState
       );
     }
 
+    if (!editorState.editable) {
+      child = IgnorePointer(
+        child: child,
+      );
+    }
+
     return child;
   }
 }

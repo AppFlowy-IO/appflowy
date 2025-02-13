@@ -368,15 +368,45 @@ class _MobileViewPageState extends State<MobileViewPage> {
       },
       builder: (context, state) {
         if (state.isLocked) {
-          return FlowySvg(
-            FlowySvgs.lock_page_s,
-            color: const Color(0xFFD95A0B),
+          return GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              context.read<ViewLockStatusBloc>().add(
+                    const ViewLockStatusEvent.unlock(),
+                  );
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(
+                top: 4.0,
+                right: 8,
+                bottom: 4.0,
+              ),
+              child: FlowySvg(
+                FlowySvgs.lock_page_s,
+                color: const Color(0xFFD95A0B),
+              ),
+            ),
           );
         } else if (!state.isLocked && state.lockCounter > 0) {
-          return FlowySvg(
-            FlowySvgs.unlock_page_s,
-            color: Color(0xFF8F959E),
-            blendMode: null,
+          return GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              context.read<ViewLockStatusBloc>().add(
+                    const ViewLockStatusEvent.lock(),
+                  );
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(
+                top: 4.0,
+                right: 8,
+                bottom: 4.0,
+              ),
+              child: FlowySvg(
+                FlowySvgs.unlock_page_s,
+                color: Color(0xFF8F959E),
+                blendMode: null,
+              ),
+            ),
           );
         }
         return const SizedBox.shrink();
