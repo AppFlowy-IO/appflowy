@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'mobile_selection_menu_item.dart';
 import 'mobile_selection_menu_item_widget.dart';
+import 'slash_keyboard_service_interceptor.dart';
 
 class MobileSelectionMenuWidget extends StatefulWidget {
   const MobileSelectionMenuWidget({
@@ -60,6 +61,8 @@ class _MobileSelectionMenuWidgetState extends State<MobileSelectionMenuWidget> {
   String get keyword => _keyword;
 
   int selectedIndex = 0;
+
+  late AppFlowyKeyboardServiceInterceptor keyboardInterceptor;
 
   List<SelectionMenuItem> get filterItems {
     final List<SelectionMenuItem> items = [];
@@ -117,33 +120,51 @@ class _MobileSelectionMenuWidgetState extends State<MobileSelectionMenuWidget> {
   @override
   void initState() {
     super.initState();
-
-    final List<SelectionMenuItem> items = [];
-    for (final item in widget.items) {
-      if (item is MobileSelectionMenuItem) {
-        item.onSelected = () {
-          if (mounted) {
-            setState(() {
-              _showingItems = item.children
-                  .map((e) => e..onSelected = widget.onExit)
-                  .toList();
-            });
-          }
-        };
-      }
-      items.add(item);
-    }
-    _showingItems = items;
+    _showingItems = buildInitialItems();
 
     keepEditorFocusNotifier.increase();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
+
+    keyboardInterceptor = SlashKeyboardServiceInterceptor(
+      onDelete: () async {
+        if (!mounted) return false;
+        final hasItemsChanged = !isInitialItems();
+        if (keyword.isEmpty && hasItemsChanged) {
+          setState(() {
+            _showingItems = buildInitialItems();
+            selectedIndex = 0;
+          });
+          return true;
+        }
+        return false;
+      },
+      onEnter: () {
+        if (!mounted) return;
+        if (_showingItems.isEmpty) return;
+        final item = _showingItems[selectedIndex];
+        if (item is MobileSelectionMenuItem) {
+          selectedIndex = 0;
+          item.onSelected?.call();
+        } else {
+          item.handler(
+            editorState,
+            menuService,
+            context,
+          );
+        }
+      },
+    );
+    editorState.service.keyboardService
+        ?.registerInterceptor(keyboardInterceptor);
     editorState.selectionNotifier.addListener(onSelectionChanged);
   }
 
   @override
   void dispose() {
+    editorState.service.keyboardService
+        ?.unregisterInterceptor(keyboardInterceptor);
     editorState.selectionNotifier.removeListener(onSelectionChanged);
     _focusNode.dispose();
     keepEditorFocusNotifier.decrease();
@@ -294,5 +315,35 @@ class _MobileSelectionMenuWidgetState extends State<MobileSelectionMenuWidget> {
         ),
       ),
     );
+  }
+
+  List<SelectionMenuItem> buildInitialItems() {
+    final List<SelectionMenuItem> items = [];
+    for (final item in widget.items) {
+      if (item is MobileSelectionMenuItem) {
+        item.onSelected = () {
+          if (mounted) {
+            setState(() {
+              _showingItems = item.children
+                  .map((e) => e..onSelected = widget.onExit)
+                  .toList();
+            });
+          }
+        };
+      }
+      items.add(item);
+    }
+    return items;
+  }
+
+  bool isInitialItems() {
+    if (_showingItems.length != widget.items.length) return false;
+    int i = 0;
+    for (final item in _showingItems) {
+      final widgetItem = widget.items[i];
+      if (widgetItem.name != item.name) return false;
+      i++;
+    }
+    return true;
   }
 }

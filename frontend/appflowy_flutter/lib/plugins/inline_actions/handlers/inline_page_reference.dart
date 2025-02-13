@@ -236,7 +236,7 @@ class InlinePageReferenceService extends InlineActionsDelegate {
         keywords: [view.nameOrDefault.toLowerCase()],
         label: view.nameOrDefault,
         icon: (onSelected) => view.icon.value.isNotEmpty
-            ? EmojiIconWidget(
+            ? RawEmojiIconWidget(
                 emoji: view.icon.toEmojiIconData(),
                 emojiSize: 14,
               )

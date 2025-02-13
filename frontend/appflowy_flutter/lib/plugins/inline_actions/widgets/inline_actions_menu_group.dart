@@ -92,6 +92,8 @@ class InlineActionsWidget extends StatefulWidget {
 class _InlineActionsWidgetState extends State<InlineActionsWidget> {
   @override
   Widget build(BuildContext context) {
+    final icon = widget.item.icon;
+    final hasIcon = icon != null;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: SizedBox(
@@ -99,11 +101,18 @@ class _InlineActionsWidgetState extends State<InlineActionsWidget> {
         child: FlowyButton(
           expand: true,
           isSelected: widget.isSelected,
-          leftIcon: widget.item.icon?.call(widget.isSelected),
-          text: FlowyText.regular(
-            widget.item.label,
-            figmaLineHeight: 18,
-            overflow: TextOverflow.ellipsis,
+          text: Row(
+            children: [
+              if (hasIcon) ...[
+                icon.call(widget.isSelected),
+                SizedBox(width: 12),
+              ],
+              FlowyText.regular(
+                widget.item.label,
+                figmaLineHeight: 18,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
           ),
           onTap: _onPressed,
         ),

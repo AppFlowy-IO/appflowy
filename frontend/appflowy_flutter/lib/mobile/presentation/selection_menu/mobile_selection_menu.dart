@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:appflowy/mobile/presentation/selection_menu/mobile_selection_menu_item.dart';
 import 'package:appflowy_editor/appflowy_editor.dart';
@@ -172,7 +173,7 @@ class MobileSelectionMenu extends SelectionMenuService {
     // Workaround: We can customize the padding through the [EditorStyle],
     // but the coordinates of overlay are not properly converted currently.
     // Just subtract the padding here as a result.
-    const menuHeight = 192.0;
+    const menuHeight = 192.0, menuWidth = 240.0 + 10;
     const menuOffset = Offset(0, 10);
     final editorOffset =
         editorState.renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
@@ -194,8 +195,9 @@ class MobileSelectionMenu extends SelectionMenuService {
       offset = topRight - menuOffset;
       _alignment = Alignment.bottomLeft;
 
+      final limitX = editorWidth - menuWidth;
       _offset = Offset(
-        offset.dx,
+        min(offset.dx, limitX),
         MediaQuery.of(context).size.height - offset.dy,
       );
     }
@@ -206,8 +208,10 @@ class MobileSelectionMenu extends SelectionMenuService {
           ? Alignment.topRight
           : Alignment.bottomRight;
 
+      final x = editorWidth - _offset.dx + editorOffset.dx;
+      final limitX = editorWidth - menuWidth + editorOffset.dx;
       _offset = Offset(
-        editorWidth - _offset.dx + editorOffset.dx,
+        min(x, limitX),
         _offset.dy,
       );
     }

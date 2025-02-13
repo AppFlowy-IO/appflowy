@@ -1,3 +1,4 @@
+import 'package:appflowy/mobile/presentation/selection_menu/mobile_selection_menu_item.dart';
 import 'package:appflowy/mobile/presentation/selection_menu/mobile_selection_menu_item_widget.dart';
 import 'package:appflowy/mobile/presentation/selection_menu/mobile_selection_menu_widget.dart';
 import 'package:appflowy/plugins/document/presentation/editor_plugins/slash_menu/slash_menu_items/mobile_items.dart';
@@ -36,8 +37,16 @@ void main() {
       await tester.ime.insertText(searchText);
       final itemWidgets = find.byType(MobileSelectionMenuItemWidget);
       int number = 0;
-      for (final mobileItem in mobileItems) {
-        for (final item in mobileItem.children) {
+      for (final item in mobileItems) {
+        if (item is MobileSelectionMenuItem) {
+          for (final childItem in item.children) {
+            if (childItem.name
+                .toLowerCase()
+                .contains(searchText.toLowerCase())) {
+              number++;
+            }
+          }
+        } else {
           if (item.name.toLowerCase().contains(searchText.toLowerCase())) {
             number++;
           }
@@ -55,6 +64,7 @@ void main() {
         matching: find.byType(ListView),
       );
       for (final item in mobileItems) {
+        if (item is! MobileSelectionMenuItem) continue;
         await tester.editor.showSlashMenu();
         await tester.scrollUntilVisible(
           find.text(item.name),

@@ -16,7 +16,7 @@ final _keywords = [
 
 // table menu item
 SelectionMenuItem tableSlashMenuItem = SelectionMenuItem(
-  getName: () => LocaleKeys.document_slashMenu_name_table.tr(),
+  getName: () => LocaleKeys.document_slashMenu_name_simpleTable.tr(),
   keywords: _keywords,
   handler: (editorState, _, __) async => editorState.insertSimpleTable(),
   nameBuilder: slashMenuItemNameBuilder,

@@ -1689,8 +1689,11 @@
       "name": {
         "textStyle": "Text Style",
         "list": "List",
-        "fileOrMedia": "File or Media",
-        "decorations": "Decorations",
+        "toggle": "Toggle",
+        "fileAndMedia": "File & Media",
+        "simpleTable": "Simple Table",
+        "visuals": "Visuals",
+        "document": "Document",
         "advanced": "Advanced",
         "text": "Text",
         "heading1": "Heading 1",

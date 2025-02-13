@@ -58,7 +58,7 @@ class MobileSelectionMenuItemWidget extends StatelessWidget {
               Spacer(),
               Icon(
                 Icons.keyboard_arrow_right_rounded,
-                color: Color(0xff1E2022).withValues(alpha: 0.3),
+                color: style.selectionMenuItemTextColor.withValues(alpha: 0.3),
               ),
             ],
           ],
