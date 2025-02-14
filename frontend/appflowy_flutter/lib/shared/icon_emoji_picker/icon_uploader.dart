@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:appflowy/generated/locale_keys.g.dart';
+import 'package:appflowy/plugins/document/presentation/editor_drop_manager.dart';
 import 'package:appflowy/plugins/document/presentation/editor_plugins/copy_and_paste/clipboard_service.dart';
 import 'package:appflowy/plugins/document/presentation/editor_plugins/image/image_util.dart';
 import 'package:appflowy/shared/appflowy_network_image.dart';
@@ -17,8 +18,7 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flowy_infra/file_picker/file_picker_service.dart';
-import 'package:flowy_infra_ui/style_widget/primary_rounded_button.dart';
-import 'package:flowy_infra_ui/style_widget/text.dart';
+import 'package:flowy_infra_ui/flowy_infra_ui.dart';
 import 'package:flowy_svg/flowy_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -50,6 +50,8 @@ class _IconUploaderState extends State<IconUploader> {
 
   final List<_Image> pickedImages = [];
   final FocusNode focusNode = FocusNode();
+  final topEditorDropManagerState = getIt.get<EditorDropManagerState>();
+  final iconUploaderType = 'iconUploaderType';
 
   @override
   void initState() {
@@ -63,11 +65,17 @@ class _IconUploaderState extends State<IconUploader> {
         focusNode.requestFocus();
       });
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      topEditorDropManagerState.add(iconUploaderType);
+    });
   }
 
   @override
   void dispose() {
     super.dispose();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      topEditorDropManagerState.remove(iconUploaderType);
+    });
     focusNode.dispose();
   }
 
@@ -97,9 +105,6 @@ class _IconUploaderState extends State<IconUploader> {
               children: [
                 Expanded(
                   child: DropTarget(
-                    /// there is an issue with multiple DropTargets
-                    /// see https://github.com/MixinNetwork/flutter-plugins/issues/2
-                    enable: false,
                     onDragEntered: (_) => setState(() => isHovering = true),
                     onDragExited: (_) => setState(() => isHovering = false),
                     onDragDone: (details) => loadImage(details.files),
@@ -107,7 +112,7 @@ class _IconUploaderState extends State<IconUploader> {
                       cursor: SystemMouseCursors.click,
                       child: GestureDetector(
                         behavior: HitTestBehavior.opaque,
-                        onTap: () => pickImage(),
+                        onTap: pickImage,
                         child: DottedBorder(
                           dashPattern: const [3, 3],
                           radius: const Radius.circular(8),
@@ -115,9 +120,12 @@ class _IconUploaderState extends State<IconUploader> {
                           color: isHovering
                               ? Theme.of(context).colorScheme.primary
                               : Theme.of(context).hintColor,
-                          child: Center(
+                          child: Container(
+                            alignment: Alignment.center,
                             child: pickedImages.isEmpty
-                                ? dragHint()
+                                ? (isHovering
+                                    ? hoveringWidget()
+                                    : dragHint(context))
                                 : previewImage(),
                           ),
                         ),
@@ -127,12 +135,21 @@ class _IconUploaderState extends State<IconUploader> {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: _ConfirmButton(
-                      onTap: uploadImage,
-                      enable: pickedImages.isNotEmpty,
-                    ),
+                  child: Row(
+                    children: [
+                      Spacer(),
+                      if (pickedImages.isNotEmpty)
+                        Padding(
+                          padding: EdgeInsets.only(right: 8),
+                          child: _ChangeIconButton(
+                            onTap: pickImage,
+                          ),
+                        ),
+                      _ConfirmButton(
+                        onTap: uploadImage,
+                        enable: pickedImages.isNotEmpty,
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -143,12 +160,49 @@ class _IconUploaderState extends State<IconUploader> {
     );
   }
 
-  Widget dragHint() => FlowyText(
-        LocaleKeys.document_imageBlock_upload_placeholder.tr(),
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-        color: Theme.of(context).hintColor,
-      );
+  Widget hoveringWidget() {
+    return Container(
+      color: Color(0xffE0F8FF),
+      child: Center(
+        child: FlowyText(
+          LocaleKeys.emojiIconPicker_iconUploader_dropToUpload.tr(),
+        ),
+      ),
+    );
+  }
+
+  Widget dragHint(BuildContext context) {
+    final style = TextStyle(
+      fontSize: 14,
+      color: Color(0xff666D76),
+      fontWeight: FontWeight.w500,
+    );
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 32),
+      child: RichText(
+        textAlign: TextAlign.center,
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text:
+                  LocaleKeys.emojiIconPicker_iconUploader_placeholderLeft.tr(),
+            ),
+            TextSpan(
+              text: LocaleKeys.emojiIconPicker_iconUploader_placeholderUpload
+                  .tr(),
+              style: style.copyWith(color: Color(0xff00BCF0)),
+            ),
+            TextSpan(
+              text:
+                  LocaleKeys.emojiIconPicker_iconUploader_placeholderRight.tr(),
+              mouseCursor: SystemMouseCursors.click,
+            ),
+          ],
+          style: style,
+        ),
+      ),
+    );
+  }
 
   Widget previewImage() {
     final image = pickedImages.first;
@@ -285,6 +339,41 @@ class _IconUploaderState extends State<IconUploader> {
   }
 }
 
+class _ChangeIconButton extends StatelessWidget {
+  const _ChangeIconButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return SizedBox(
+      height: 32,
+      width: 84,
+      child: FlowyButton(
+        text: FlowyText(
+          LocaleKeys.emojiIconPicker_iconUploader_change.tr(),
+          fontSize: 14.0,
+          fontWeight: FontWeight.w500,
+          figmaLineHeight: 20.0,
+          color: isDark ? Colors.white : Color(0xff1F2329),
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+        ),
+        margin: const EdgeInsets.symmetric(horizontal: 14.0),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        hoverColor:
+            (isDark ? Colors.white : Color(0xffD1D8E0)).withValues(alpha: 0.9),
+        decoration: BoxDecoration(
+          border: Border.all(color: isDark ? Colors.white : Color(0xffD1D8E0)),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        onTap: onTap,
+      ),
+    );
+  }
+}
+
 class _ConfirmButton extends StatelessWidget {
   const _ConfirmButton({required this.onTap, this.enable = true});
 
@@ -299,6 +388,7 @@ class _ConfirmButton extends StatelessWidget {
         opacity: enable ? 1.0 : 0.5,
         child: PrimaryRoundedButton(
           text: LocaleKeys.button_confirm.tr(),
+          figmaLineHeight: 20.0,
           onTap: enable ? onTap : null,
         ),
       ),

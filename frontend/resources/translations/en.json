@@ -161,6 +161,15 @@
     "csv": "CSV",
     "database": "Database"
   },
+  "emojiIconPicker": {
+    "iconUploader": {
+      "placeholderLeft": "Drag & drop a file, click to ",
+      "placeholderUpload": "Upload",
+      "placeholderRight": ", or paste an image link.",
+      "dropToUpload": "Drop a file to upload",
+      "change": "Change"
+    }
+  },
   "disclosureAction": {
     "rename": "Rename",
     "delete": "Delete",

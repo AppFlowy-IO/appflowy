@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:appflowy/env/cloud_env.dart';
+import 'package:appflowy/plugins/document/presentation/editor_drop_manager.dart';
 import 'package:appflowy/util/expand_views.dart';
 import 'package:appflowy/workspace/application/settings/prelude.dart';
 import 'package:appflowy_backend/appflowy_backend.dart';
@@ -185,6 +186,7 @@ Future<void> initGetIt(
   );
   getIt.registerSingleton<PluginSandbox>(PluginSandbox());
   getIt.registerSingleton<ViewExpanderRegistry>(ViewExpanderRegistry());
+  getIt.registerSingleton<EditorDropManagerState>(EditorDropManagerState());
 
   await DependencyResolver.resolve(getIt, mode);
 }
