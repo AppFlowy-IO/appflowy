@@ -1,4 +1,5 @@
 import 'package:appflowy/mobile/presentation/selection_menu/mobile_selection_menu.dart';
+import 'package:appflowy/mobile/presentation/selection_menu/mobile_selection_menu_item_widget.dart';
 import 'package:appflowy/plugins/document/presentation/editor_configuration.dart';
 import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/material.dart';
@@ -94,6 +95,7 @@ Future<bool> _showSlashMenu(
 
   final context = editorState.getNodeAtPath(selection.start.path)?.context;
   if (context != null && context.mounted) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
     _selectionMenuService?.dismiss();
     _selectionMenuService = UniversalPlatform.isMobile
         ? MobileSelectionMenu(
@@ -103,7 +105,9 @@ Future<bool> _showSlashMenu(
             deleteSlashByDefault: shouldInsertSlash,
             deleteKeywordsByDefault: deleteKeywordsByDefault,
             singleColumn: singleColumn,
-            style: style,
+            style: isLight
+                ? MobileSelectionMenuStyle.light
+                : MobileSelectionMenuStyle.dark,
             startOffset: editorState.selection?.start.offset ?? 0,
           )
         : SelectionMenu(

@@ -122,12 +122,14 @@ class MobileInlineActionsWidget extends StatelessWidget {
                   item.icon!.call(isSelected),
                   SizedBox(width: 12),
                 ],
-                FlowyText.regular(
-                  item.label,
-                  figmaLineHeight: 18,
-                  overflow: TextOverflow.ellipsis,
-                  fontSize: 16,
-                  color: style.menuItemSelectedTextColor,
+                Flexible(
+                  child: FlowyText.regular(
+                    item.label,
+                    figmaLineHeight: 18,
+                    overflow: TextOverflow.ellipsis,
+                    fontSize: 16,
+                    color: style.menuItemSelectedTextColor,
+                  ),
                 ),
               ],
             ),

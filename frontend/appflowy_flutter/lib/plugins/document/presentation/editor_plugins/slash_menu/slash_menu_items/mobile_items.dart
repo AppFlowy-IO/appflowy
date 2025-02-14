@@ -7,24 +7,26 @@ import 'package:easy_localization/easy_localization.dart';
 
 import 'slash_menu_items.dart';
 
-final List<MobileSelectionMenuItem> mobileItems = [
+final List<SelectionMenuItem> mobileItems = [
   textStyleMobileSlashMenuItem,
   listMobileSlashMenuItem,
   toggleListMobileSlashMenuItem,
-  fileOrMediaMobileSlashMenuItem,
-  decorationsMobileSlashMenuItem,
-  tableMobileSlashMenuItem,
-  dateOrReminderMobileSlashMenuItem,
+  fileAndMediaMobileSlashMenuItem,
+  mobileTableSlashMenuItem,
+  visualsMobileSlashMenuItem,
+  dateOrReminderSlashMenuItem,
+  subPageSlashMenuItem,
   advancedMobileSlashMenuItem,
 ];
 
-final List<MobileSelectionMenuItem> mobileItemsInTale = [
+final List<SelectionMenuItem> mobileItemsInTale = [
   textStyleMobileSlashMenuItem,
   listMobileSlashMenuItem,
   toggleListMobileSlashMenuItem,
-  fileOrMediaMobileSlashMenuItem,
-  decorationsMobileSlashMenuItem,
-  dateOrReminderMobileSlashMenuItem,
+  fileAndMediaMobileSlashMenuItem,
+  visualsMobileSlashMenuItem,
+  dateOrReminderSlashMenuItem,
+  subPageSlashMenuItem,
   advancedMobileSlashMenuItem,
 ];
 
@@ -64,7 +66,7 @@ MobileSelectionMenuItem listMobileSlashMenuItem = MobileSelectionMenuItem(
 );
 
 MobileSelectionMenuItem toggleListMobileSlashMenuItem = MobileSelectionMenuItem(
-  getName: LocaleKeys.document_slashMenu_name_toggleList.tr,
+  getName: LocaleKeys.document_slashMenu_name_toggle.tr,
   handler: _handler,
   icon: (_, isSelected, style) => SelectableSvgWidget(
     data: FlowySvgs.slash_menu_icon_toggle_s,
@@ -80,9 +82,9 @@ MobileSelectionMenuItem toggleListMobileSlashMenuItem = MobileSelectionMenuItem(
   ],
 );
 
-MobileSelectionMenuItem fileOrMediaMobileSlashMenuItem =
+MobileSelectionMenuItem fileAndMediaMobileSlashMenuItem =
     MobileSelectionMenuItem(
-  getName: LocaleKeys.document_slashMenu_name_fileOrMedia.tr,
+  getName: LocaleKeys.document_slashMenu_name_fileAndMedia.tr,
   handler: _handler,
   icon: (_, isSelected, style) => SelectableSvgWidget(
     data: FlowySvgs.slash_menu_icon_file_s,
@@ -97,59 +99,32 @@ MobileSelectionMenuItem fileOrMediaMobileSlashMenuItem =
   ],
 );
 
-MobileSelectionMenuItem decorationsMobileSlashMenuItem =
-    MobileSelectionMenuItem(
-  getName: LocaleKeys.document_slashMenu_name_decorations.tr,
+MobileSelectionMenuItem visualsMobileSlashMenuItem = MobileSelectionMenuItem(
+  getName: LocaleKeys.document_slashMenu_name_visuals.tr,
   handler: _handler,
   icon: (_, isSelected, style) => SelectableSvgWidget(
-    data: FlowySvgs.slash_menu_icon_simple_table_s,
+    data: FlowySvgs.slash_menu_icon_visuals_s,
     isSelected: isSelected,
     style: style,
   ),
   nameBuilder: slashMenuItemNameBuilder,
   children: [
-    quoteSlashMenuItem,
+    calloutSlashMenuItem,
     dividerSlashMenuItem,
+    quoteSlashMenuItem,
   ],
-);
-
-MobileSelectionMenuItem tableMobileSlashMenuItem = MobileSelectionMenuItem(
-  getName: LocaleKeys.document_slashMenu_name_table.tr,
-  handler: _handler,
-  icon: (_, isSelected, style) => SelectableSvgWidget(
-    data: FlowySvgs.slash_menu_icon_simple_table_s,
-    isSelected: isSelected,
-    style: style,
-  ),
-  nameBuilder: slashMenuItemNameBuilder,
-  children: [tableSlashMenuItem],
-);
-
-MobileSelectionMenuItem dateOrReminderMobileSlashMenuItem =
-    MobileSelectionMenuItem(
-  getName: LocaleKeys.document_slashMenu_name_dateOrReminder.tr,
-  handler: _handler,
-  icon: (_, isSelected, style) => SelectableSvgWidget(
-    data: FlowySvgs.slash_menu_icon_date_or_reminder_s,
-    isSelected: isSelected,
-    style: style,
-  ),
-  nameBuilder: slashMenuItemNameBuilder,
-  children: [dateOrReminderSlashMenuItem],
 );
 
 MobileSelectionMenuItem advancedMobileSlashMenuItem = MobileSelectionMenuItem(
   getName: LocaleKeys.document_slashMenu_name_advanced.tr,
   handler: _handler,
   icon: (_, isSelected, style) => SelectableSvgWidget(
-    data: FlowySvgs.m_aa_font_color_m,
+    data: FlowySvgs.drag_element_s,
     isSelected: isSelected,
     style: style,
   ),
   nameBuilder: slashMenuItemNameBuilder,
   children: [
-    subPageSlashMenuItem,
-    calloutSlashMenuItem,
     codeBlockSlashMenuItem,
     mathEquationSlashMenuItem,
   ],

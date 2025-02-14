@@ -4,6 +4,7 @@ import 'package:appflowy/plugins/document/presentation/editor_plugins/copy_and_p
 import 'package:appflowy/plugins/document/presentation/editor_plugins/mention/mention_page_block.dart';
 import 'package:appflowy/plugins/document/presentation/editor_plugins/plugins.dart';
 import 'package:appflowy/shared/patterns/file_type_patterns.dart';
+import 'package:appflowy/startup/startup.dart';
 import 'package:appflowy/workspace/presentation/widgets/draggable_item/draggable_item.dart';
 import 'package:appflowy_backend/protobuf/flowy-folder/view.pb.dart';
 import 'package:appflowy_editor/appflowy_editor.dart';
@@ -66,12 +67,22 @@ class EditorDropHandler extends StatelessWidget {
           return true;
         },
         onAcceptWithDetails: _onDragViewDone,
-        builder: (context, _, __) => DropTarget(
-          enable: dropState.isDropEnabled,
-          onDragExited: (_) => editorState.selectionService.removeDropTarget(),
-          onDragUpdated: (details) => _onDragUpdated(details.globalPosition),
-          onDragDone: _onDragDone,
-          child: child,
+        builder: (context, _, __) => ChangeNotifierProvider(
+          create: (_) => getIt.get<EditorDropManagerState>(),
+          builder: (context, _) {
+            final topLevelEditorDropManagerState =
+                Provider.of<EditorDropManagerState>(context);
+            return DropTarget(
+              enable: dropState.isDropEnabled &&
+                  topLevelEditorDropManagerState.isDropEnabled,
+              onDragExited: (_) =>
+                  editorState.selectionService.removeDropTarget(),
+              onDragUpdated: (details) =>
+                  _onDragUpdated(details.globalPosition),
+              onDragDone: _onDragDone,
+              child: child,
+            );
+          },
         ),
       ),
     );

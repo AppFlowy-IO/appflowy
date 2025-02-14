@@ -27,6 +27,18 @@ SelectionMenuItem tableSlashMenuItem = SelectionMenuItem(
   ),
 );
 
+SelectionMenuItem mobileTableSlashMenuItem = SelectionMenuItem(
+  getName: () => LocaleKeys.document_slashMenu_name_simpleTable.tr(),
+  keywords: _keywords,
+  handler: (editorState, _, __) async => editorState.insertSimpleTable(),
+  nameBuilder: slashMenuItemNameBuilder,
+  icon: (_, isSelected, style) => SelectableSvgWidget(
+    data: FlowySvgs.slash_menu_icon_simple_table_s,
+    isSelected: isSelected,
+    style: style,
+  ),
+);
+
 extension on EditorState {
   Future<void> insertSimpleTable() async {
     final selection = this.selection;

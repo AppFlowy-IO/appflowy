@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:appflowy/plugins/document/presentation/editor_plugins/parsers/sub_page_node_parser.dart';
@@ -36,34 +37,41 @@ Future<String> customDocumentToMarkdown(
       fileName = p.basenameWithoutExtension(path),
       dirName = resourceDir.name;
 
-  final markdown = documentToMarkdown(
-    document,
-    customParsers: [
-      const MathEquationNodeParser(),
-      const CalloutNodeParser(),
-      const ToggleListNodeParser(),
-      CustomImageNodeFileParser(fileFutures, dirName),
-      CustomMultiImageNodeFileParser(fileFutures, dirName),
-      GridNodeParser(fileFutures, dirName),
-      BoardNodeParser(fileFutures, dirName),
-      CalendarNodeParser(fileFutures, dirName),
-      const CustomParagraphNodeParser(),
-      const SubPageNodeParser(),
-      const SimpleTableNodeParser(),
-      const LinkPreviewNodeParser(),
-      const FileBlockNodeParser(),
-    ],
-  );
+  String markdown = '';
+  try {
+    markdown = documentToMarkdown(
+      document,
+      customParsers: [
+        const MathEquationNodeParser(),
+        const CalloutNodeParser(),
+        const ToggleListNodeParser(),
+        CustomImageNodeFileParser(fileFutures, dirName),
+        CustomMultiImageNodeFileParser(fileFutures, dirName),
+        GridNodeParser(fileFutures, dirName),
+        BoardNodeParser(fileFutures, dirName),
+        CalendarNodeParser(fileFutures, dirName),
+        const CustomParagraphNodeParser(),
+        const SubPageNodeParser(),
+        const SimpleTableNodeParser(),
+        const LinkPreviewNodeParser(),
+        const FileBlockNodeParser(),
+      ],
+    );
+  } catch (e) {
+    Log.error('documentToMarkdown error: $e');
+  }
 
   /// create resource directory
   if (fileFutures.isNotEmpty) archive.addFile(resourceDir);
 
-  /// add markdown file to Archive
-  archive.addFile(ArchiveFile.string('$fileName-$id.md', markdown));
-
   for (final fileFuture in fileFutures) {
     archive.addFile(await fileFuture);
   }
+
+  /// add markdown file to Archive
+  final dataBytes = utf8.encode(markdown);
+  archive.addFile(ArchiveFile('$fileName-$id.md', dataBytes.length, dataBytes));
+
   if (archive.isNotEmpty && path.isNotEmpty) {
     if (onArchive == null) {
       final zipEncoder = ZipEncoder();

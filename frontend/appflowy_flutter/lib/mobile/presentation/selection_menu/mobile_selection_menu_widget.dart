@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'mobile_selection_menu_item.dart';
 import 'mobile_selection_menu_item_widget.dart';
+import 'slash_keyboard_service_interceptor.dart';
 
 class MobileSelectionMenuWidget extends StatefulWidget {
   const MobileSelectionMenuWidget({
@@ -31,7 +32,7 @@ class MobileSelectionMenuWidget extends StatefulWidget {
 
   final VoidCallback onExit;
 
-  final SelectionMenuStyle selectionMenuStyle;
+  final MobileSelectionMenuStyle selectionMenuStyle;
 
   final bool deleteSlashByDefault;
   final bool singleColumn;
@@ -60,6 +61,8 @@ class _MobileSelectionMenuWidgetState extends State<MobileSelectionMenuWidget> {
   String get keyword => _keyword;
 
   int selectedIndex = 0;
+
+  late AppFlowyKeyboardServiceInterceptor keyboardInterceptor;
 
   List<SelectionMenuItem> get filterItems {
     final List<SelectionMenuItem> items = [];
@@ -102,10 +105,9 @@ class _MobileSelectionMenuWidgetState extends State<MobileSelectionMenuWidget> {
         !(widget.deleteSlashByDefault && _searchCounter < 2)) {
       return widget.onExit();
     }
-    setState(() {
-      selectedIndex = 0;
-      _showingItems = items;
-    });
+
+    _showingItems = items;
+    refreshSelectedIndex();
 
     if (_showingItems.isEmpty) {
       _searchCounter++;
@@ -117,33 +119,49 @@ class _MobileSelectionMenuWidgetState extends State<MobileSelectionMenuWidget> {
   @override
   void initState() {
     super.initState();
-
-    final List<SelectionMenuItem> items = [];
-    for (final item in widget.items) {
-      if (item is MobileSelectionMenuItem) {
-        item.onSelected = () {
-          if (mounted) {
-            setState(() {
-              _showingItems = item.children
-                  .map((e) => e..onSelected = widget.onExit)
-                  .toList();
-            });
-          }
-        };
-      }
-      items.add(item);
-    }
-    _showingItems = items;
+    _showingItems = buildInitialItems();
 
     keepEditorFocusNotifier.increase();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
+
+    keyboardInterceptor = SlashKeyboardServiceInterceptor(
+      onDelete: () async {
+        if (!mounted) return false;
+        final hasItemsChanged = !isInitialItems();
+        if (keyword.isEmpty && hasItemsChanged) {
+          _showingItems = buildInitialItems();
+          refreshSelectedIndex();
+          return true;
+        }
+        return false;
+      },
+      onEnter: () {
+        if (!mounted) return;
+        if (_showingItems.isEmpty) return;
+        final item = _showingItems[selectedIndex];
+        if (item is MobileSelectionMenuItem) {
+          selectedIndex = 0;
+          item.onSelected?.call();
+        } else {
+          item.handler(
+            editorState,
+            menuService,
+            context,
+          );
+        }
+      },
+    );
+    editorState.service.keyboardService
+        ?.registerInterceptor(keyboardInterceptor);
     editorState.selectionNotifier.addListener(onSelectionChanged);
   }
 
   @override
   void dispose() {
+    editorState.service.keyboardService
+        ?.unregisterInterceptor(keyboardInterceptor);
     editorState.selectionNotifier.removeListener(onSelectionChanged);
     _focusNode.dispose();
     keepEditorFocusNotifier.decrease();
@@ -207,6 +225,7 @@ class _MobileSelectionMenuWidgetState extends State<MobileSelectionMenuWidget> {
     if (widget.singleColumn) {
       final List<Widget> itemWidgets = [];
       for (var i = 0; i < items.length; i++) {
+        final item = items[i];
         itemWidgets.add(
           GestureDetector(
             onTapDown: (e) {
@@ -215,11 +234,14 @@ class _MobileSelectionMenuWidgetState extends State<MobileSelectionMenuWidget> {
               });
             },
             child: MobileSelectionMenuItemWidget(
-              item: items[i],
+              item: item,
               isSelected: i == selectedIndex,
               editorState: editorState,
               menuService: menuService,
               selectionMenuStyle: widget.selectionMenuStyle,
+              onTap: () {
+                if (item is MobileSelectionMenuItem) refreshSelectedIndex();
+              },
             ),
           ),
         );
@@ -245,6 +267,7 @@ class _MobileSelectionMenuWidgetState extends State<MobileSelectionMenuWidget> {
       }
 
       for (var i = 0; i < items.length; i++) {
+        final item = items[i];
         if (i != 0 && i % (widget.maxItemInRow) == 0) {
           columns.add(
             Column(
@@ -256,11 +279,14 @@ class _MobileSelectionMenuWidgetState extends State<MobileSelectionMenuWidget> {
         }
         itemWidgets.add(
           MobileSelectionMenuItemWidget(
-            item: items[i],
+            item: item,
             isSelected: false,
             editorState: editorState,
             menuService: menuService,
             selectionMenuStyle: widget.selectionMenuStyle,
+            onTap: () {
+              if (item is MobileSelectionMenuItem) refreshSelectedIndex();
+            },
           ),
         );
       }
@@ -280,6 +306,13 @@ class _MobileSelectionMenuWidgetState extends State<MobileSelectionMenuWidget> {
     }
   }
 
+  void refreshSelectedIndex() {
+    if (!mounted) return;
+    setState(() {
+      selectedIndex = 0;
+    });
+  }
+
   Widget _buildNoResultsWidget(BuildContext context) {
     return const Padding(
       padding: EdgeInsets.all(8.0),
@@ -294,5 +327,35 @@ class _MobileSelectionMenuWidgetState extends State<MobileSelectionMenuWidget> {
         ),
       ),
     );
+  }
+
+  List<SelectionMenuItem> buildInitialItems() {
+    final List<SelectionMenuItem> items = [];
+    for (final item in widget.items) {
+      if (item is MobileSelectionMenuItem) {
+        item.onSelected = () {
+          if (mounted) {
+            setState(() {
+              _showingItems = item.children
+                  .map((e) => e..onSelected = widget.onExit)
+                  .toList();
+            });
+          }
+        };
+      }
+      items.add(item);
+    }
+    return items;
+  }
+
+  bool isInitialItems() {
+    if (_showingItems.length != widget.items.length) return false;
+    int i = 0;
+    for (final item in _showingItems) {
+      final widgetItem = widget.items[i];
+      if (widgetItem.name != item.name) return false;
+      i++;
+    }
+    return true;
   }
 }
