@@ -1,5 +1,6 @@
 import 'package:appflowy/core/helpers/url_launcher.dart';
 import 'package:appflowy/startup/tasks/device_info_task.dart';
+import 'package:appflowy_backend/log.dart';
 import 'package:auto_updater/auto_updater.dart';
 import 'package:collection/collection.dart';
 import 'package:http/http.dart' as http;
@@ -32,13 +33,15 @@ class VersionChecker {
   /// Returns a list of [AppcastItem] or throws an exception if the feed URL is not set
   Future<AppcastItem?> checkForUpdateInformation() async {
     if (_feedUrl == null) {
-      throw Exception('Feed URL not set. Call setFeedUrl() first.');
+      Log.error('Feed URL is not set');
+      return null;
     }
 
     try {
       final response = await http.get(Uri.parse(_feedUrl!));
       if (response.statusCode != 200) {
-        throw Exception('Failed to fetch appcast feed');
+        Log.info('Failed to fetch appcast XML: ${response.statusCode}');
+        return null;
       }
 
       // Parse XML content
@@ -51,8 +54,10 @@ class VersionChecker {
           .nonNulls
           .firstWhereOrNull((e) => e.os == ApplicationInfo.os);
     } catch (e) {
-      throw Exception('Error checking for updates: $e');
+      Log.error('Failed to check for updates: $e');
     }
+
+    return null;
   }
 
   /// For Windows and macOS, calling this API will trigger the auto updater to check for updates
